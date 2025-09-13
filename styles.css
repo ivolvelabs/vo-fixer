@@ -1,4 +1,4 @@
-/* Layout */
+/* (existing styles kept) */
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
@@ -69,8 +69,15 @@ h3 {
   color: #fff;
   border-color: #111;
 }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 input[type="number"] {
   width: 90px;
+}
+input[type="range"] {
+  width: 180px;
 }
 select {
   min-width: 140px;
@@ -78,10 +85,6 @@ select {
 .muted {
   opacity: 0.7;
   font-size: 12px;
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .players {
@@ -105,13 +108,51 @@ audio {
   width: 100%;
 }
 
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.tab {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #f7f7f7;
+  cursor: pointer;
+  font-size: 13px;
+}
+.tab.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.chip {
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
+}
+
 /* Tooltip (contained) */
 .tip {
   position: relative;
+  width: 320px;
   cursor: help;
   background: #eef2ff;
   color: #1f2937;
-  width: 320px;
   border-radius: 8px;
   font-weight: 600;
   padding: 0 6px;
@@ -122,7 +163,7 @@ audio {
   z-index: 10;
   left: 0;
   top: calc(100% + 6px);
-  /* max-width: 520px; */
+  /* max-width: 320px; */
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: anywhere;
@@ -148,14 +189,7 @@ audio {
 .right .tip::after {
   right: auto;
 }
-.left .tip {
-  overflow: visible;
-}
-.right .tip {
-  overflow: visible;
-}
 
-/* Preview loader */
 .previewWrap {
   position: relative;
 }
@@ -176,16 +210,12 @@ audio {
   border-top-color: transparent;
   animation: spin 0.8s linear infinite;
 }
-.hidden {
-  display: none;
-}
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Log */
 .log {
   background: #0a0a0a;
   color: #d1d5db;
