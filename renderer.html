@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; media-src 'self' file:;">
+    <title>VO Fixer — Clean & Master</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- LEFT: scrollable controls -->
+      <aside class="left">
+        <h2>VO Fixer</h2>
+        <div class="section">
+          <button id="pickIn" class="btn">Choose input…</button>
+          <div class="subtext" id="inPath"></div>
+          <div class="subtext small">
+            Default output: <span id="outPath"></span>
+          </div>
+        </div>
+
+        <h3>Cleanup</h3>
+        <div class="section-note">Remove rumble/noise, tame harsh “S”.</div>
+
+        <div class="row">
+          <label class="lab">
+            High-pass (Hz)
+            <span class="tip" data-tip="Cuts very low rumble not part of voice. 80–100 Hz (male), 90–120 Hz (female).">ⓘ</span>
+          </label>
+          <input id="hp" type="number" value="80">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Denoise
+            <span class="tip" data-tip="Reduces steady background noise. ‘afftdn’ is fast; ‘anlmdn’ is slower but can sound more natural.">ⓘ</span>
+          </label>
+          <select id="denoise">
+            <option value="afftdn" selected>afftdn (fast)</option>
+            <option value="anlmdn">anlmdn (quality)</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Noise level (dB)
+            <span class="tip" data-tip="How loud the background noise is. More negative = stronger reduction. If voice sounds ‘underwater’, use -20 instead of -30.">ⓘ</span>
+          </label>
+          <input id="nf" type="number" value="-25" step="1">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            De-hum (50/100/150)
+            <span class="tip" data-tip="Removes electrical hum and harmonics (AC/power). Turn off if there’s no hum.">ⓘ</span>
+          </label>
+          <input id="dehum" type="checkbox" checked>
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            De-esser (0–1)
+            <span class="tip" data-tip="Tames sharp ‘S’. 0.3–0.6 typical. If lispy/dull, lower it.">ⓘ</span>
+          </label>
+          <input id="deess" type="number" value="0.5" step="0.05" min="0" max="1">
+        </div>
+
+        <h3>Tone (EQ)</h3>
+        <div class="section-note">Make words clearer (Presence); add a touch of brightness (Air).</div>
+
+        <div class="row">
+          <label class="lab">
+            Presence @3.5k (dB)
+            <span class="tip" data-tip="Boosts clarity so words pop. +1 to +3 dB often helps; too much can sound sharp.">ⓘ</span>
+          </label>
+          <input id="presence" type="number" value="2" step="0.5">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Air @11k (dB)
+            <span class="tip" data-tip="Adds crisp ‘studio sheen’. Use lightly (+1 to +2 dB). May raise hiss.">ⓘ</span>
+          </label>
+          <input id="air" type="number" value="0" step="0.5">
+        </div>
+
+        <h3>Dynamics</h3>
+        <div class="section-note">Keep loud/soft parts steady without sounding squashed.</div>
+
+        <div class="row">
+          <label class="lab">
+            Comp threshold (dB)
+            <span class="tip" data-tip="Level where compression starts. Lower (e.g., -24) = more often; higher (e.g., -14) = just on peaks.">ⓘ</span>
+          </label>
+          <input id="cth" type="number" value="-18" step="1">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Ratio
+            <span class="tip" data-tip="How strongly loud parts are reduced. 3:1 natural; 4:1 firmer.">ⓘ</span>
+          </label>
+          <input id="cr" type="number" value="3" step="0.5">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Makeup (dB)
+            <span class="tip" data-tip="Adds back volume lost to compression. If breaths jump out or it pumps, reduce.">ⓘ</span>
+          </label>
+          <input id="cm" type="number" value="6" step="0.5">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            Limiter ceiling
+            <span class="tip" data-tip="Safety cap to prevent clipping. Keep ≈0.95.">ⓘ</span>
+          </label>
+          <input id="lim" type="number" value="0.95" step="0.01" min="0.5" max="1">
+        </div>
+
+        <h3>Loudness</h3>
+        <div class="section-note">Match platform targets so your VO sits right.</div>
+
+        <div class="row">
+          <label class="lab">
+            LUFS target
+            <span class="tip" data-tip="-19 is great for mono VO; stereo mixes commonly use -16.">ⓘ</span>
+          </label>
+          <input id="lufs" type="number" value="-19" step="1">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            LRA
+            <span class="tip" data-tip="Loudness range: lower = steadier volume. 5–8 keeps narration smooth.">ⓘ</span>
+          </label>
+          <input id="lra" type="number" value="7" step="1">
+        </div>
+
+        <div class="row">
+          <label class="lab">
+            True Peak (dBTP)
+            <span class="tip" data-tip="Max allowed peak post-encoding. -1.0 dBTP avoids distortion.">ⓘ</span>
+          </label>
+          <input id="tp" type="number" value="-1" step="0.1">
+        </div>
+      </aside>
+
+      <!-- RIGHT: players + export + log -->
+      <main class="right">
+        <div class="players">
+          <div class="card">
+            <div class="card-head">
+              <strong>Original</strong>
+            </div>
+            <audio id="origPlayer" controls></audio>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <strong>Preview (processed)</strong>
+              <span class="muted">click “Render Preview” after tweaks</span>
+            </div>
+            <div class="previewWrap">
+              <div id="previewLoader" class="loader hidden"></div>
+              <!-- <audio id="prevPlayer" controls></audio> -->
+               <audio id="prevPlayer" controls preload="auto"></audio>
+            </div>
+            <div class="row" style="margin-top:8px;">
+              <button id="renderPreviewBtn" class="btn">Render Preview</button>
+              <span class="muted">(~8s, fast render)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="go" class="btn primary">Process & Save</button>
+          <span class="muted">Saved to: <span id="outPathDup"></span></span>
+        </div>
+
+        <h3>Log</h3>
+        <pre id="log" class="log"></pre>
+      </main>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

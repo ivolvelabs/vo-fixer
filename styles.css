@@ -1,0 +1,196 @@
+/* Layout */
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
+}
+.app {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: 100vh;
+}
+.left {
+  padding: 16px;
+  border-right: 1px solid #e5e7eb;
+  overflow: auto;
+}
+.right {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+h2 {
+  margin: 0 0 12px;
+}
+h3 {
+  margin: 16px 0 8px;
+}
+.section {
+  margin-bottom: 10px;
+}
+.section-note {
+  font-size: 12px;
+  opacity: 0.8;
+  margin: -4px 0 8px 0;
+}
+.subtext {
+  margin-top: 6px;
+  opacity: 0.8;
+  word-break: break-all;
+}
+.subtext.small {
+  font-size: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+.lab {
+  width: 220px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f7f7f7;
+}
+.btn.primary {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+input[type="number"] {
+  width: 90px;
+}
+select {
+  min-width: 140px;
+}
+.muted {
+  opacity: 0.7;
+  font-size: 12px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.players {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+audio {
+  width: 100%;
+}
+
+/* Tooltip (contained) */
+.tip {
+  position: relative;
+  cursor: help;
+  background: #eef2ff;
+  color: #1f2937;
+  width: 320px;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0 6px;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  top: calc(100% + 6px);
+  /* max-width: 520px; */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 8px 10px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.12s, transform 0.12s;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.tip:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Keep tooltip inside viewport */
+.left .tip::after,
+.right .tip::after {
+  right: auto;
+}
+.left .tip {
+  overflow: visible;
+}
+.right .tip {
+  overflow: visible;
+}
+
+/* Preview loader */
+.previewWrap {
+  position: relative;
+}
+.loader {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 8px;
+}
+.loader::after {
+  content: "";
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #999;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+.hidden {
+  display: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Log */
+.log {
+  background: #0a0a0a;
+  color: #d1d5db;
+  padding: 8px;
+  height: 260px;
+  overflow: auto;
+  border-radius: 8px;
+}

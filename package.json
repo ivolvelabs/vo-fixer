@@ -1,0 +1,17 @@
+{
+  "name": "vo-fixer",
+  "version": "0.1.1",
+  "private": true,
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.3.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "ffmpeg-static": "^5.2.0"
+  }
+}
