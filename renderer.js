@@ -22,22 +22,62 @@ tabSimple.onclick = () => setMode("simple");
 tabAdvanced.onclick = () => setMode("advanced");
 setMode("simple");
 
-// SIMPLE MODE state
-const macroIds = ["macroConfidence", "macroWarmth", "macroClarity"];
-const macroValIds = ["macroConfidenceVal", "macroWarmthVal", "macroClarityVal"];
-const presetButtons = [...document.querySelectorAll(".chip[data-preset]")];
+// RUBBER BAND: browse + status
+let RUBBERBAND_OK = false;
+async function refreshRbStatus() {
+  const { available, path, viaPath, reason } = await window.vofix.rbGet();
+  window.RUBBERBAND_OK = !!available;
 
-macroIds.forEach((id, i) => {
+  const statusEl = $("rbStatus");
+  const where = path ? `(${path})` : viaPath ? "(via PATH)" : "";
+  if (available) {
+    statusEl.textContent = `Found ✓ ${where}`;
+  } else {
+    statusEl.textContent = `Not working ✗ ${where}`;
+    // Add a tooltip with the exact reason (error, missing DLLs, etc.)
+    statusEl.title = reason || "Unknown error";
+  }
+
+  $("rbWarn").classList.toggle("hidden", available);
+  $("rbWarnAdv").classList.toggle("hidden", available);
+  // Disable pitch/timbre fields if not available
+  $("vsPitch").disabled = !available;
+  $("vsFormant").disabled = !available;
+  $("advPitch").disabled = !available;
+  $("advFormant").disabled = !available;
+}
+
+$("rbBrowse").onclick = async () => {
+  const res = await window.vofix.rbPick();
+  if (!res?.canceled) {
+    // If not available, show reason prominently in the log as well
+    if (!res.available && res.reason) {
+      const log = $("log");
+      log.textContent += `Rubber Band test failed:\n${res.reason}\n`;
+    }
+    await refreshRbStatus();
+  }
+};
+
+refreshRbStatus();
+
+// SIMPLE MODE state
+["macroConfidence", "macroWarmth", "macroClarity"].forEach((id, i) => {
+  const map = ["macroConfidenceVal", "macroWarmthVal", "macroClarityVal"];
   $(id).addEventListener("input", () => {
-    $(macroValIds[i]).innerText = $(id).value;
+    $(map[i]).innerText = $(id).value;
   });
 });
+$("vsPitch").addEventListener(
+  "input",
+  () => ($("vsPitchVal").textContent = $("vsPitch").value)
+);
+$("vsTempo").addEventListener(
+  "input",
+  () => ($("vsTempoVal").textContent = $("vsTempo").value + "%")
+);
 
-// ──────────────────────────────────────────
-// Option builders
-// ──────────────────────────────────────────
-
-// Simple-mode preset seeds
+// Presets
 const PRESET_SEEDS = {
   yt_pro: {
     conf: 65,
@@ -85,39 +125,44 @@ const PRESET_SEEDS = {
     dehum: true,
   },
 };
+let currentSeedPreset = PRESET_SEEDS.yt_pro;
+[...document.querySelectorAll(".chip[data-preset]")].forEach((btn) => {
+  btn.onclick = () => {
+    const k = btn.dataset.preset;
+    currentSeedPreset = PRESET_SEEDS[k] || PRESET_SEEDS.yt_pro;
+    $("macroConfidence").value = currentSeedPreset.conf;
+    $("macroWarmth").value = currentSeedPreset.warm;
+    $("macroClarity").value = currentSeedPreset.clar;
+    $("macroConfidenceVal").innerText = currentSeedPreset.conf;
+    $("macroWarmthVal").innerText = currentSeedPreset.warm;
+    $("macroClarityVal").innerText = currentSeedPreset.clar;
+  };
+});
+$("makeProBtn").onclick = () => {
+  currentSeedPreset = PRESET_SEEDS.yt_pro;
+  $("macroConfidence").value = PRESET_SEEDS.yt_pro.conf;
+  $("macroWarmth").value = PRESET_SEEDS.yt_pro.warm;
+  $("macroClarity").value = PRESET_SEEDS.yt_pro.clar;
+  $("macroConfidenceVal").innerText = PRESET_SEEDS.yt_pro.conf;
+  $("macroWarmthVal").innerText = PRESET_SEEDS.yt_pro.warm;
+  $("macroClarityVal").innerText = PRESET_SEEDS.yt_pro.clar;
+};
 
-// Map macros → processing params
+// Map Simple macros → detailed chain
 function simpleMacrosToOptions({ conf, warm, clar, seed }) {
-  // Normalize 0..1
   const C = conf / 100,
     W = warm / 100,
     K = clar / 100;
-
-  // Presence & Air from clarity
-  const presence = +(1 + 3 * K).toFixed(1); // ~ +1 to +4 dB
-  const air = +(0 + 2 * Math.max(0, K - 0.5)).toFixed(1); // add Air after mid clarity
-
-  // De-esser intensity from clarity (more clarity = slightly more sibilance control)
-  const deess = +(0.35 + 0.35 * K).toFixed(2); // 0.35..0.70
-
-  // Warmth → low tilt (simulate via less highpass + subtle body; we’ll avoid low-shelf and just lower HPF)
-  const highpassHz = Math.round(70 + 60 * (1 - W)); // 70..130 (more warmth = lower HPF)
-
-  // Confidence → comp amount + makeup; limiter fixed
-  const compRatio = +(2.6 + 1.2 * C).toFixed(1); // 2.6..3.8
-  const compThreshold = Math.round(-20 + 6 * (1 - C)); // -20..-14 (more confidence = higher threshold? flip for natural; keep -18 default-like)
-  const compMakeup = +(5 + 2 * C).toFixed(1); // 5..7 dB
-
-  // Denoise choice from seed; NF from seed
+  const presence = +(1 + 3 * K).toFixed(1);
+  const air = +(0 + 2 * Math.max(0, K - 0.5)).toFixed(1);
+  const deess = +(0.35 + 0.35 * K).toFixed(2);
+  const highpassHz = Math.round(70 + 60 * (1 - W));
+  const compRatio = +(2.6 + 1.2 * C).toFixed(1);
+  const compThreshold = Math.round(-20 + 6 * (1 - C));
+  const compMakeup = +(5 + 2 * C).toFixed(1);
   const denoise = seed?.denoise || "afftdn";
   const denoiseAmount = seed?.nf ?? -25;
   const dehum = !!seed?.dehum;
-
-  // Loudness target mono VO
-  const loudnormI = -19,
-    loudnormLRA = 7,
-    loudnormTP = -1;
-
   return {
     highpassHz,
     denoise,
@@ -130,13 +175,13 @@ function simpleMacrosToOptions({ conf, warm, clar, seed }) {
     compRatio,
     compMakeup,
     limiterCeiling: 0.95,
-    loudnormI,
-    loudnormLRA,
-    loudnormTP,
+    loudnormI: -19,
+    loudnormLRA: 7,
+    loudnormTP: -1,
   };
 }
 
-// Advanced-mode direct read
+// Advanced read
 function advancedOptions() {
   return {
     highpassHz: Number($("hp").value),
@@ -156,53 +201,58 @@ function advancedOptions() {
   };
 }
 
-// Decide which options to use
+// Build current options (including Voice Shape)
 function currentOptions() {
   const simpleActive = !simplePanel.classList.contains("hidden");
+  const base = simpleActive
+    ? simpleMacrosToOptions({
+        conf: Number($("macroConfidence").value),
+        warm: Number($("macroWarmth").value),
+        clar: Number($("macroClarity").value),
+        seed: currentSeedPreset,
+      })
+    : advancedOptions();
+
+  let pitchSemi, tempoPct, preserveFormants;
   if (simpleActive) {
-    const conf = Number($("macroConfidence").value);
-    const warm = Number($("macroWarmth").value);
-    const clar = Number($("macroClarity").value);
-    const seed = currentSeedPreset || PRESET_SEEDS.yt_pro;
-    return simpleMacrosToOptions({ conf, warm, clar, seed });
+    pitchSemi = Number($("vsPitch").value);
+    tempoPct = Number($("vsTempo").value);
+    preserveFormants = !!$("vsFormant").checked;
+  } else {
+    pitchSemi = Number($("advPitch").value);
+    tempoPct = Number($("advTempo").value);
+    preserveFormants = !!$("advFormant").checked;
   }
-  return advancedOptions();
+
+  // Debug hint in log if user left defaults (no audible change)
+  try {
+    const log = $("log");
+    if (pitchSemi === 0 && tempoPct === 100) {
+      log.textContent +=
+        "[ui] Voice Shape currently set to no change (0 st, 100%).\n";
+    } else {
+      log.textContent += `[ui] Voice Shape set: pitch=${pitchSemi} st, tempo=${tempoPct}%, formant=${preserveFormants}\n`;
+    }
+  } catch {}
+
+  return {
+    ...base,
+    voiceShape: {
+      useRubberband: RUBBERBAND_OK,
+      pitchSemi,
+      tempoPct,
+      preserveFormants,
+    },
+  };
 }
 
-// Preset handling
-let currentSeedPreset = PRESET_SEEDS.yt_pro; // default
-presetButtons.forEach((btn) => {
-  btn.onclick = () => {
-    const key = btn.dataset.preset;
-    currentSeedPreset = PRESET_SEEDS[key] || PRESET_SEEDS.yt_pro;
-    // Snap macros to preset then let user tweak
-    $("macroConfidence").value = currentSeedPreset.conf;
-    $("macroWarmth").value = currentSeedPreset.warm;
-    $("macroClarity").value = currentSeedPreset.clar;
-    $("macroConfidenceVal").innerText = currentSeedPreset.conf;
-    $("macroWarmthVal").innerText = currentSeedPreset.warm;
-    $("macroClarityVal").innerText = currentSeedPreset.clar;
-  };
-});
-
-// Make It Pro → set YT Pro and macros defaults
-$("makeProBtn").onclick = () => {
-  currentSeedPreset = PRESET_SEEDS.yt_pro;
-  $("macroConfidence").value = PRESET_SEEDS.yt_pro.conf;
-  $("macroWarmth").value = PRESET_SEEDS.yt_pro.warm;
-  $("macroClarity").value = PRESET_SEEDS.yt_pro.clar;
-  $("macroConfidenceVal").innerText = PRESET_SEEDS.yt_pro.conf;
-  $("macroWarmthVal").innerText = PRESET_SEEDS.yt_pro.warm;
-  $("macroClarityVal").innerText = PRESET_SEEDS.yt_pro.clar;
-};
-
-// ──────────────────────────────────────────
-// Existing preview & process functions (robust loader version)
-// ─────────────────────────────────────────-
+// Preview + processing (robust)
 function setOriginalPlayer() {
   const orig = $("origPlayer");
-  orig.src = window.vofix.toFileUrl(inPath);
-  orig.load();
+  if (inPath) {
+    orig.src = window.vofix.toFileUrl(inPath);
+    orig.load();
+  }
 }
 function setDefaultOutputText() {
   $("outPath").innerText = defaultOut || "";
@@ -214,7 +264,6 @@ function showLoader() {
 function hideLoader() {
   $("previewLoader").classList.add("hidden");
 }
-
 function waitForPlayable(audio, timeoutMs = 12000) {
   return new Promise((resolve, reject) => {
     let done = false;
@@ -249,7 +298,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function renderPreview() {
   if (!inPath) return alert("Pick an input file first.");
-
   const btn = $("renderPreviewBtn");
   const prev = $("prevPlayer");
   const log = $("log");
@@ -312,6 +360,7 @@ async function pickInput() {
   }
 }
 
+// Buttons
 $("pickIn").onclick = pickInput;
 $("renderPreviewBtn").onclick = renderPreview;
 
@@ -330,10 +379,12 @@ $("go").onclick = async () => {
   }
 };
 
-// Log hook + preload guard
+// Log hook
 window.vofix.onLog((msg) => {
   const log = $("log");
   log.textContent += msg;
   log.scrollTop = log.scrollHeight;
 });
+
+// Preload guard
 if (!window.vofix) alert("Preload failed: window.vofix undefined.");

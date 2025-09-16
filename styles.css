@@ -1,4 +1,4 @@
-/* (existing styles kept) */
+/* existing styles retained */
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
@@ -146,16 +146,16 @@ audio {
   display: none !important;
 }
 
-/* Tooltip (contained) */
 .tip {
   position: relative;
-  width: 320px;
   cursor: help;
   background: #eef2ff;
   color: #1f2937;
   border-radius: 8px;
   font-weight: 600;
   padding: 0 6px;
+  width: 320px;
+
 }
 .tip::after {
   content: attr(data-tip);
@@ -182,12 +182,6 @@ audio {
 .tip:hover::after {
   opacity: 1;
   transform: translateY(0);
-}
-
-/* Keep tooltip inside viewport */
-.left .tip::after,
-.right .tip::after {
-  right: auto;
 }
 
 .previewWrap {
@@ -223,4 +217,14 @@ audio {
   height: 260px;
   overflow: auto;
   border-radius: 8px;
+}
+
+.warn {
+  background: #fff7ed;
+  color: #7c2d12;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  margin-top: 8px;
 }

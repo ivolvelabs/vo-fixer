@@ -16,12 +16,17 @@
         <div class="section">
           <button id="pickIn" class="btn">Choose input…</button>
           <div class="subtext" id="inPath"></div>
-          <div class="subtext small">
-            Default output: <span id="outPath"></span>
-          </div>
+          <div class="subtext small">Default output: <span id="outPath"></span></div>
         </div>
 
-        <!-- Mode toggle -->
+        <!-- Settings: Rubber Band -->
+        <h3>Settings</h3>
+        <div class="row">
+          <label class="lab">Rubber Band</label>
+          <button id="rbBrowse" class="btn">Locate…</button>
+          <span id="rbStatus" class="muted">checking…</span>
+        </div>
+
         <div class="tabs">
           <button id="tabSimple" class="tab active">Simple</button>
           <button id="tabAdvanced" class="tab">Advanced</button>
@@ -30,7 +35,7 @@
         <!-- SIMPLE MODE -->
         <div id="simplePanel">
           <div class="section">
-            <button id="makeProBtn" class="btn primary" title="Applies the recommended pro narration chain tuned to your voice">Make It Pro</button>
+            <button id="makeProBtn" class="btn primary">Make It Pro</button>
           </div>
 
           <h3>Presets</h3>
@@ -44,152 +49,69 @@
 
           <h3>Macros</h3>
           <div class="row">
-            <label class="lab">Confidence<span class="tip" data-tip="Adds presence and gentle compression for ‘anchored’ delivery.">ⓘ</span></label>
+            <label class="lab">Confidence<span class="tip" data-tip="Presence + gentle compression for anchored delivery.">ⓘ</span></label>
             <input id="macroConfidence" type="range" min="0" max="100" value="60">
             <span id="macroConfidenceVal" class="muted">60</span>
           </div>
           <div class="row">
-            <label class="lab">Warmth<span class="tip" data-tip="Adds body and tames harshness so it sounds friendly and full.">ⓘ</span></label>
+            <label class="lab">Warmth<span class="tip" data-tip="Adds body, softens edges for friendly fullness.">ⓘ</span></label>
             <input id="macroWarmth" type="range" min="0" max="100" value="40">
             <span id="macroWarmthVal" class="muted">40</span>
           </div>
-            <div class="row">
-            <label class="lab">Clarity<span class="tip" data-tip="Boosts intelligibility and crispness without being hissy.">ⓘ</span></label>
+          <div class="row">
+            <label class="lab">Clarity<span class="tip" data-tip="Boosts intelligibility and crispness.">ⓘ</span></label>
             <input id="macroClarity" type="range" min="0" max="100" value="50">
             <span id="macroClarityVal" class="muted">50</span>
           </div>
 
-          <div class="section-note">Tip: Click a preset, then nudge the three macros to taste.</div>
+          <h3>Voice Shape</h3>
+          <div class="section-note">Subtle pitch/tempo with natural timbre.</div>
+          <div class="row">
+            <label class="lab">Weight (semitones)</label>
+            <input id="vsPitch" type="range" min="-6" max="6" value="0">
+            <span id="vsPitchVal" class="muted">0</span>
+          </div>
+          <div class="row">
+            <label class="lab">Pace (%)</label>
+            <input id="vsTempo" type="range" min="80" max="200" value="100">
+            <span id="vsTempoVal" class="muted">100%</span>
+          </div>
+          <div class="row">
+            <label class="lab">Preserve timbre</label>
+            <input id="vsFormant" type="checkbox" checked>
+          </div>
+          <div id="rbWarn" class="warn hidden">Rubber Band not available — pitch/timbre disabled.</div>
         </div>
 
         <!-- ADVANCED MODE -->
         <div id="advancedPanel" class="hidden">
           <h3>Cleanup</h3>
-          <div class="section-note">Remove rumble/noise, tame harsh “S”.</div>
-
-          <div class="row">
-            <label class="lab">
-              High-pass (Hz)
-              <span class="tip" data-tip="Cuts very low rumble not part of voice. 80–100 Hz (male), 90–120 Hz (female).">ⓘ</span>
-            </label>
-            <input id="hp" type="number" value="80">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Denoise
-              <span class="tip" data-tip="Reduces steady background noise. ‘afftdn’ is fast; ‘anlmdn’ is slower but can sound more natural.">ⓘ</span>
-            </label>
-            <select id="denoise">
-              <option value="afftdn" selected>afftdn (fast)</option>
-              <option value="anlmdn">anlmdn (quality)</option>
-            </select>
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Noise level (dB)
-              <span class="tip" data-tip="How loud the background noise is. More negative = stronger reduction. If voice sounds ‘underwater’, use -20 instead of -30.">ⓘ</span>
-            </label>
-            <input id="nf" type="number" value="-25" step="1">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              De-hum (50/100/150)
-              <span class="tip" data-tip="Removes electrical hum and harmonics (AC/power). Turn off if there’s no hum.">ⓘ</span>
-            </label>
-            <input id="dehum" type="checkbox" checked>
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              De-esser (0–1)
-              <span class="tip" data-tip="Tames sharp ‘S’. 0.3–0.6 typical. If lispy/dull, lower it.">ⓘ</span>
-            </label>
-            <input id="deess" type="number" value="0.5" step="0.05" min="0" max="1">
-          </div>
+          <div class="row"><label class="lab">High-pass (Hz)</label><input id="hp" type="number" value="80"></div>
+          <div class="row"><label class="lab">Denoise</label><select id="denoise"><option value="afftdn" selected>afftdn</option><option value="anlmdn">anlmdn</option></select></div>
+          <div class="row"><label class="lab">Noise level (dB)</label><input id="nf" type="number" value="-25" step="1"></div>
+          <div class="row"><label class="lab">De-hum</label><input id="dehum" type="checkbox" checked></div>
+          <div class="row"><label class="lab">De-esser (0–1)</label><input id="deess" type="number" value="0.5" step="0.05" min="0" max="1"></div>
 
           <h3>Tone (EQ)</h3>
-          <div class="section-note">Make words clearer (Presence); add a touch of brightness (Air).</div>
-
-          <div class="row">
-            <label class="lab">
-              Presence @3.5k (dB)
-              <span class="tip" data-tip="Boosts clarity so words pop. +1 to +3 dB often helps; too much can sound sharp.">ⓘ</span>
-            </label>
-            <input id="presence" type="number" value="2" step="0.5">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Air @11k (dB)
-              <span class="tip" data-tip="Adds crisp ‘studio sheen’. Use lightly (+1 to +2 dB). May raise hiss.">ⓘ</span>
-            </label>
-            <input id="air" type="number" value="0" step="0.5">
-          </div>
+          <div class="row"><label class="lab">Presence @3.5k (dB)</label><input id="presence" type="number" value="2" step="0.5"></div>
+          <div class="row"><label class="lab">Air @11k (dB)</label><input id="air" type="number" value="0" step="0.5"></div>
 
           <h3>Dynamics</h3>
-          <div class="section-note">Keep loud/soft parts steady without sounding squashed.</div>
-
-          <div class="row">
-            <label class="lab">
-              Comp threshold (dB)
-              <span class="tip" data-tip="Level where compression starts. Lower (e.g., -24) = more often; higher (e.g., -14) = just on peaks.">ⓘ</span>
-            </label>
-            <input id="cth" type="number" value="-18" step="1">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Ratio
-              <span class="tip" data-tip="How strongly loud parts are reduced. 3:1 natural; 4:1 firmer.">ⓘ</span>
-            </label>
-            <input id="cr" type="number" value="3" step="0.5">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Makeup (dB)
-              <span class="tip" data-tip="Adds back volume lost to compression. If breaths jump out or it pumps, reduce.">ⓘ</span>
-            </label>
-            <input id="cm" type="number" value="6" step="0.5">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              Limiter ceiling
-              <span class="tip" data-tip="Safety cap to prevent clipping. Keep ≈0.95.">ⓘ</span>
-            </label>
-            <input id="lim" type="number" value="0.95" step="0.01" min="0.5" max="1">
-          </div>
+          <div class="row"><label class="lab">Comp threshold (dB)</label><input id="cth" type="number" value="-18" step="1"></div>
+          <div class="row"><label class="lab">Ratio</label><input id="cr" type="number" value="3" step="0.5"></div>
+          <div class="row"><label class="lab">Makeup (dB)</label><input id="cm" type="number" value="6" step="0.5"></div>
+          <div class="row"><label class="lab">Limiter ceiling</label><input id="lim" type="number" value="0.95" step="0.01" min="0.5" max="1"></div>
 
           <h3>Loudness</h3>
-          <div class="section-note">Match platform targets so your VO sits right.</div>
+          <div class="row"><label class="lab">LUFS target</label><input id="lufs" type="number" value="-19" step="1"></div>
+          <div class="row"><label class="lab">LRA</label><input id="lra" type="number" value="7" step="1"></div>
+          <div class="row"><label class="lab">True Peak (dBTP)</label><input id="tp" type="number" value="-1" step="0.1"></div>
 
-          <div class="row">
-            <label class="lab">
-              LUFS target
-              <span class="tip" data-tip="-19 is great for mono VO; stereo mixes commonly use -16.">ⓘ</span>
-            </label>
-            <input id="lufs" type="number" value="-19" step="1">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              LRA
-              <span class="tip" data-tip="Loudness range: lower = steadier volume. 5–8 keeps narration smooth.">ⓘ</span>
-            </label>
-            <input id="lra" type="number" value="7" step="1">
-          </div>
-
-          <div class="row">
-            <label class="lab">
-              True Peak (dBTP)
-              <span class="tip" data-tip="Max allowed peak post-encoding. -1.0 dBTP avoids distortion.">ⓘ</span>
-            </label>
-            <input id="tp" type="number" value="-1" step="0.1">
-          </div>
+          <h3>Voice Shape (advanced)</h3>
+          <div class="row"><label class="lab">Pitch (semitones)</label><input id="advPitch" type="number" min="-6" max="6" value="0" step="0.1"></div>
+          <div class="row"><label class="lab">Tempo (%)</label><input id="advTempo" type="number" min="80" max="120" value="100" step="1"></div>
+          <div class="row"><label class="lab">Preserve timbre</label><input id="advFormant" type="checkbox" checked></div>
+          <div id="rbWarnAdv" class="warn hidden">Rubber Band not available — pitch/timbre disabled.</div>
         </div>
       </aside>
 
@@ -197,12 +119,9 @@
       <main class="right">
         <div class="players">
           <div class="card">
-            <div class="card-head">
-              <strong>Original</strong>
-            </div>
+            <div class="card-head"><strong>Original</strong></div>
             <audio id="origPlayer" controls></audio>
           </div>
-
           <div class="card">
             <div class="card-head">
               <strong>Preview (processed)</strong>
